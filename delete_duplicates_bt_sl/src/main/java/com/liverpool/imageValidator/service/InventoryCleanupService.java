@@ -45,14 +45,18 @@ public class InventoryCleanupService {
                     }
 
                     inventoryDoc.setInventory(updatedInventory);
+
+                    // 🧾 Log before saving the document
+                    log.info("💾 About to save cleaned inventory document for SKU {}: {}", sku, inventoryDoc);
+
                     inventoryRepository.save(inventoryDoc);
 
-                    log.info("✅ Cleaned SKU (only 'online' entries): " + sku);
+                    log.info("✅ Cleaned SKU (only 'online' entries): {}", sku);
                 } else {
-                    log.info("⚠️ SKU not found: " + sku);
+                    log.info("⚠️ SKU not found: {}", sku);
                 }
             } catch (Exception e) {
-                log.error("❌ Error cleaning SKU " + sku + ": " + e.getMessage());
+                log.error("❌ Error cleaning SKU {}: {}", sku, e.getMessage(), e);
             }
         }
     }
