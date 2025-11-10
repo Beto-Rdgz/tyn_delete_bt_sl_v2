@@ -143,7 +143,26 @@ public class DataOracleServiceImpl implements DataOracleService {
                         .filter(item -> item instanceof Map)
                         .anyMatch(item -> "online".equals(((Map<?, ?>) item).get("storeId")));
                 if (hasOnline) {
-                    log.info("✅ Online storeId already present for SKU {}, skipping update (Case 4)", sku);
+                    // Clean only the online entry, removing extra fields but keep others unchanged
+                    List<Object> cleanedList = new ArrayList<>();
+                    for (Object item : inventoryList) {
+                        if (item instanceof Map) {
+                            Map<?, ?> mapItem = (Map<?, ?>) item;
+                            Object storeId = mapItem.get("storeId");
+                            if ("online".equals(storeId)) {
+                                Map<String, String> cleanedOnline = new HashMap<>();
+                                cleanedOnline.put("storeId", "online");
+                                cleanedList.add(cleanedOnline);
+                            } else {
+                                cleanedList.add(item);
+                            }
+                        } else {
+                            cleanedList.add(item);
+                        }
+                    }
+                    inventoryDoc.setInventory(cleanedList);
+                    inventoryRepository.save(inventoryDoc);
+                    log.info("Cleaned extra fields from online storeId for SKU {} (Case 4 updated)", sku);
                 } else {
                     Map<String, String> onlineStore = new HashMap<>();
                     onlineStore.put("storeId", "online");
