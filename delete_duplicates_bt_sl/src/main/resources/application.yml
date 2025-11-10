@@ -72,3 +72,23 @@ config:
   threads: 1
   batchSize: 400
   numberBatches: 1
+
+url:
+  inventory:
+    qa:
+      sofLine: http://172.16.213.173:7001/dyn/admin/nucleus/com/liverpool/integrations/coherence/inventory/LPCoherencePreBackInventoryWarmer/?propertyName=softLineInventorySkuIds&newValue=
+      bigTicket: http://172.16.213.173:7001/dyn/admin/nucleus/com/liverpool/integrations/coherence/inventory/LPCoherencePreBackInventoryWarmer/?propertyName=bigTicketInventorySkuIds&newValue=
+      invoke: http://172.16.213.173:7001/dyn/admin/nucleus/com/liverpool/integrations/coherence/inventory/LPCoherencePreBackInventoryWarmer/?invokeMethod=manuallySyncCoherenceToMongoDB&submit
+    prod:
+      sofLine: http://172.17.219.172:7001/dyn/admin/nucleus/com/liverpool/integrations/coherence/inventory/LPCoherencePreBackInventoryWarmer/?propertyName=softLineInventorySkuIds&newValue=
+      bigTicket: http://172.17.219.172:7001/dyn/admin/nucleus/com/liverpool/integrations/coherence/inventory/LPCoherencePreBackInventoryWarmer/?propertyName=bigTicketInventorySkuIds&newValue=
+      invoke: http://172.17.219.172:7001/dyn/admin/nucleus/com/liverpool/integrations/coherence/inventory/LPCoherencePreBackInventoryWarmer/?invokeMethod=manuallySyncCoherenceToMongoDB&submit
+
+auth:
+  user:
+    name:
+      qa: =YWRtaW4=
+      prod: YmF0Y2hhdGc=
+    password:
+      qa: YWRtaW4xMjM=
+      prod: OHo2QiE3cFRTekhC
