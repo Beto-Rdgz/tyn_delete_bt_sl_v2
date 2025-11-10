@@ -89,15 +89,15 @@ public class DataOracleServiceImpl implements DataOracleService {
         for (int i = 0; i < skus.size(); i += this.batchSize) {
             int end = Math.min(i + this.batchSize, skus.size());
             List<String> chunk = skus.subList(i, end);
-            log.info("Eliminando chunk {}/{} size={}", (i / this.batchSize) + 1,
+            log.info("Eliminando bloque {}/{} SKUs={}", (i / this.batchSize) + 1,
                     (int) Math.ceil((double) skus.size() / this.batchSize), chunk.size());
 
             int deleted = oracleDBRepository.deleteIuoBySkusInBatch(chunk, productType);
             totalDeleted += deleted;
-            log.info("Filas eliminadas en chunk: {}", deleted);
+            log.info("Filas eliminadas del bloque: {}", deleted);
 
             try {
-                Thread.sleep(5000);
+                Thread.sleep(120000);
             } catch (InterruptedException e) {
                 log.error("Thread sleep interrupted", e);
                 Thread.currentThread().interrupt();
