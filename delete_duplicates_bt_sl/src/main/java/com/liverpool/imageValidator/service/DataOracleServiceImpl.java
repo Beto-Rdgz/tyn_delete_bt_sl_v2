@@ -2,6 +2,8 @@ package com.liverpool.imageValidator.service;
 
 import com.liverpool.imageValidator.config.AppConfig;
 import com.liverpool.imageValidator.models.SkusToDeleteDTO;
+import com.liverpool.imageValidator.repository.InventoryRepository;
+import com.liverpool.imageValidator.entity.Inventory;
 import com.liverpool.imageValidator.repository.OracleDBRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -24,6 +27,7 @@ public class DataOracleServiceImpl implements DataOracleService {
 
     private final OracleDBRepository oracleDBRepository;
     private final AppConfig appConfig;
+    private final InventoryRepository inventoryRepository;
 
     private int batchSize;
 
@@ -88,10 +92,61 @@ public class DataOracleServiceImpl implements DataOracleService {
             int deleted = oracleDBRepository.deleteIuoBySkusInBatch(chunk, productType);
             totalDeleted += deleted;
             log.info("Filas eliminadas en chunk: {}", deleted);
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                log.error("Thread sleep interrupted", e);
+                Thread.currentThread().interrupt();
+            }
+
+            CompletableFuture.runAsync(() -> updateMongoAfterDeletion(chunk));
+            // updateMongoAfterDeletion(chunk);
         }
 
         log.info("Total filas eliminadas ({}): {}", productType, totalDeleted);
         return totalDeleted;
+    }
+
+    private void updateMongoAfterDeletion(List<String> chunk) {
+        log.info("🚀 Mongo update thread started for chunk size={} (Thread: {})", chunk.size(), Thread.currentThread().getName());
+
+        for (String sku : chunk) {
+            Optional<Inventory> optionalInventory = inventoryRepository.findById(sku);
+
+            if (!optionalInventory.isPresent()) {
+                log.warn("⚠️ SKU {} not found in Mongo. Skipping.", sku);
+                continue;
+            }
+
+            Inventory inventoryDoc = optionalInventory.get();
+            List<Object> inventoryList = inventoryDoc.getInventory();
+
+            if (inventoryList == null || inventoryList.isEmpty()) {
+                // Case 2
+                inventoryList = new ArrayList<>();
+                Map<String, String> onlineStore = new HashMap<>();
+                onlineStore.put("storeId", "online");
+                inventoryList.add(onlineStore);
+                inventoryDoc.setInventory(inventoryList);
+                inventoryRepository.save(inventoryDoc);
+                log.info("Initialized empty inventory list and added online storeId for SKU {} (Case 2)", sku);
+            } else {
+                boolean hasOnline = inventoryList.stream()
+                        .filter(item -> item instanceof Map)
+                        .anyMatch(item -> "online".equals(((Map<?, ?>) item).get("storeId")));
+                if (hasOnline) {
+                    log.info("✅ Online storeId already present for SKU {}, skipping update (Case 4)", sku);
+                } else {
+                    Map<String, String> onlineStore = new HashMap<>();
+                    onlineStore.put("storeId", "online");
+                    inventoryList.add(onlineStore);
+                    inventoryDoc.setInventory(inventoryList);
+                    inventoryRepository.save(inventoryDoc);
+                    log.info("➕ Appended online storeId to inventory list for SKU {} (Case 3)", sku);
+                }
+            }
+        }
     }
 
 }
