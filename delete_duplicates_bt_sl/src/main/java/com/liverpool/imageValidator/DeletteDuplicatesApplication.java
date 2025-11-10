@@ -106,9 +106,9 @@ public class DeletteDuplicatesApplication implements CommandLineRunner {
             this.dataOracleService.deleteSkusFromFileByType("BT");
             this.dataOracleService.deleteSkusFromFileByType("SL");
 
-            // 🧼 Call your cleanup here
+            /*// 🧼 Call your cleanup here
             inventoryCleanupService.cleanInventoryFields(skusSoftLine);
-            log.info("Limpieza de inventario finalizada para {} SKUs.", skusSoftLine.size());
+            log.info("Limpieza de inventario finalizada para {} SKUs.", skusSoftLine.size());*/
 
         } catch (Exception e) {
             log.error("Error al obtener SKUs: {}", e.getMessage(), e);
