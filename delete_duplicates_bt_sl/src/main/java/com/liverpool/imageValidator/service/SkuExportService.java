@@ -1,7 +1,12 @@
 package com.liverpool.imageValidator.service;
 
 import com.liverpool.imageValidator.models.SkusToDeleteDTO;
+import com.liverpool.imageValidator.utils.RestTemplateUrl;
+import com.liverpool.imageValidator.utils.Util;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -12,17 +17,30 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Slf4j
 @Service
+@ConfigurationProperties(prefix = "url")
 public class SkuExportService {
 
     private static final Path BASE_DIR_EXECUTION = Paths.get("files", "execution", "skuList");
     private static final Path BASE_DIR_DELETE = Paths.get("files", "deleteDB", "skuList");
     private static final DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    public List<String>  exportSkuLists(List<SkusToDeleteDTO> skusForDelete) {
+
+
+    private String URL_BT;
+    private String URL_SL;
+    private String URL_INVOKE;
+    private String user_name;
+    private String password;
+
+    public List<String> exportSkuLists(List<SkusToDeleteDTO> skusForDelete) {
+
+        ResponseEntity<String> onlineResponse = null;
+        ResponseEntity<String> btvResponse = null;
+
         if (skusForDelete == null || skusForDelete.isEmpty()) {
             log.info("No hay SKUs para procesar. Limpio archivos previos en deleteDB y retorno.");
 
@@ -57,6 +75,32 @@ public class SkuExportService {
                 .filter(s -> s.getProductType() == 1)
                 .map(SkusToDeleteDTO::getSkuId)
                 .collect(Collectors.toList());
+
+
+        //logic to call methods
+        if (!btList.isEmpty()) {
+            log.info("inside of bigTicket response " + Util.makeUrl(URL_BT, btList));
+            btvResponse = RestTemplateUrl.callMethod(Util.makeUrl(URL_BT, btList) + "&change", user_name, password);
+        }
+
+
+        if (!slList.isEmpty()) {
+            log.info("inside of Online response " + Util.makeUrl(URL_SL, slList));
+            onlineResponse = RestTemplateUrl.callMethod(Util.makeUrl(URL_SL, slList) + "&change", user_name, password);
+        }
+
+        if (onlineResponse != null || btvResponse != null) {
+            if ((onlineResponse.getStatusCode().equals(HttpStatus.OK) || btvResponse.getStatusCode().equals(HttpStatus.OK)) ||
+                    (onlineResponse.getStatusCode().equals(HttpStatus.OK) && btvResponse.getStatusCode().equals(HttpStatus.OK))) {
+                ResponseEntity<String> invokeResponse = RestTemplateUrl.callMethod(URL_INVOKE, user_name, password);
+                if (!invokeResponse.getStatusCode().is2xxSuccessful()) {
+                    log.info("Error to pushing values " + invokeResponse.getStatusCode());
+                } else {
+                    log.info("Pushing values successfully " + invokeResponse.getStatusCode());
+                }
+
+            }
+        }
 
         List<String> othersList = skusForDelete.stream()
                 .filter(s -> s.getProductType() != 0 && s.getProductType() != 1)
