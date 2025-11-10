@@ -1,0 +1,74 @@
+# Profile por dafault
+spring:
+  application:
+    name: validatorInventoryIUOMongo
+  data:
+    mongodb:
+      #uri: mongodb+srv://USR_SISTEMAS_BACKEND:******@gcp-searchreplacementqa.y94yb.mongodb.net/SEARCHREPLACEMENTQAS2
+      uri: mongodb+srv://USR_SISTEMAS_SOPORTE:*******@gcp-searchreplacementpr.baz1w.mongodb.net/SEARCHREPLACEMENTPROD?authSource=admin&replicaSet=atlas-i5l510-shard-0&readPreference=primary&ssl=true
+  profiles:
+    active: prod
+
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: INFO
+    org.springframework.data.mongodb.core.query: INFO
+    org.mongodb.driver.protocol: INFO
+    org.mongodb.driver.cluster: INFO
+
+---
+
+# Perfil QA
+---
+spring:
+  profiles: qa
+
+datasource:
+  primary:
+    jdbc-url: jdbc:oracle:thin:@172.16.203.217:1527/IUOQ
+    username: USR_INVENTARIO
+    password: *****
+    driver-class-name: oracle.jdbc.OracleDriver
+  secondary:
+    jdbc-url: jdbc:oracle:thin:@172.16.212.96:1521/ATGQAS2
+    username: USR_SISTEMAS
+    password: *****
+    driver-class-name: oracle.jdbc.OracleDriver
+
+# Enviroment QA
+config:
+  atgCataSchema: QA2CATA
+  atgCoreSchema: QA2CORE
+  iuoSchema: APL_INVUN
+  threads: 1
+  batchSize: 400
+  numberBatches: 1
+
+---
+
+# Perfil PROD
+---
+spring:
+  profiles: prod
+
+datasource:
+  primary:
+    jdbc-url: jdbc:oracle:thin:@172.27.203.166:1527/IUOP
+    username: USR_CANCELACIONES
+    password: ******
+    driver-class-name: oracle.jdbc.OracleDriver
+  secondary:
+    jdbc-url: jdbc:oracle:thin:@172.17.212.8:1521/ATGPRO
+    username: USR_SISTEMAS
+    password: *****
+    driver-class-name: oracle.jdbc.OracleDriver
+
+# Enviroment PROD
+config:
+  atgCataSchema: ATGCATA
+  atgCoreSchema: ATGCORE
+  iuoSchema: APL_INVUN
+  threads: 1
+  batchSize: 400
+  numberBatches: 1

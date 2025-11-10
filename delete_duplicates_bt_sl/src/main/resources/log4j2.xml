@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Archivo de log de salida general -->
+        <File name="FileLogger" fileName="./logs/validator_image.log" append="true">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </PatternLayout>
+        </File>
+        <!-- Console appender para imprimir en la consola -->
+        <Console name="ConsoleLogger" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- Logger para tu aplicación -->
+        <Logger name="com.liverpool.ImageValidator" level="debug" additivity="false">
+            <AppenderRef ref="FileLogger" />
+            <AppenderRef ref="ConsoleLogger" />
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="ConsoleLogger" />
+        </Root>
+    </Loggers>
+</Configuration>
