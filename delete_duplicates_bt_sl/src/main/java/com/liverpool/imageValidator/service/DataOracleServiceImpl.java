@@ -83,6 +83,9 @@ public class DataOracleServiceImpl implements DataOracleService {
         log.info("Total SKUs a eliminar ({}): {}", productType, skus.size());
         long totalDeleted = 0L;
 
+        // 🧩 Collect async tasks
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
         for (int i = 0; i < skus.size(); i += this.batchSize) {
             int end = Math.min(i + this.batchSize, skus.size());
             List<String> chunk = skus.subList(i, end);
@@ -100,9 +103,13 @@ public class DataOracleServiceImpl implements DataOracleService {
                 Thread.currentThread().interrupt();
             }
 
-            CompletableFuture.runAsync(() -> updateMongoAfterDeletion(chunk));
-            // updateMongoAfterDeletion(chunk);
+            // 🔄 Add async task to list
+            futures.add(CompletableFuture.runAsync(() -> updateMongoAfterDeletion(chunk)));
         }
+
+        // ✅ Wait for all async tasks before exiting
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        log.info("✅ All Mongo updates completed before exiting");
 
         log.info("Total filas eliminadas ({}): {}", productType, totalDeleted);
         return totalDeleted;
