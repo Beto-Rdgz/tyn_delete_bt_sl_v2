@@ -92,23 +92,11 @@ public class DeletteDuplicatesApplication implements CommandLineRunner {
             log.info("Número de SKUs candidatos a apagar: {}", skusForDelete.size());
 
             // separamos los skus en listas y las imprimimos en la ruta
-            List<String> skusSoftLine = this.skuExportService.exportSkuLists(skusForDelete);
-
-            // Si no hay SKUs (export devolvió vacío), terminamos la ejecución aquí
-            if (skusSoftLine == null || skusSoftLine.isEmpty()) {
-                log.info("No hay SKUs finales para procesar. Terminando ejecución.");
-                return;
-            }
-
-            log.info("Skus a modificar en mongo: {}", skusSoftLine.size());
+            this.skuExportService.exportSkuLists(skusForDelete);
 
             // Eliminamos SKUs de las respectivas tablas BT y SL en IUO
             this.dataOracleService.deleteSkusFromFileByType("BT");
             this.dataOracleService.deleteSkusFromFileByType("SL");
-
-            /*// 🧼 Call your cleanup here
-            inventoryCleanupService.cleanInventoryFields(skusSoftLine);
-            log.info("Limpieza de inventario finalizada para {} SKUs.", skusSoftLine.size());*/
 
         } catch (Exception e) {
             log.error("Error al obtener SKUs: {}", e.getMessage(), e);
