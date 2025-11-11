@@ -132,8 +132,9 @@ public class DataOracleServiceImpl implements DataOracleService {
             if (inventoryList == null || inventoryList.isEmpty()) {
                 // Case 2
                 inventoryList = new ArrayList<>();
-                Map<String, String> onlineStore = new HashMap<>();
+                Map<String, Object> onlineStore = new HashMap<>();
                 onlineStore.put("storeId", "online");
+                onlineStore.put("stock", 0);
                 inventoryList.add(onlineStore);
                 inventoryDoc.setInventory(inventoryList);
                 inventoryRepository.save(inventoryDoc);
@@ -150,8 +151,9 @@ public class DataOracleServiceImpl implements DataOracleService {
                             Map<?, ?> mapItem = (Map<?, ?>) item;
                             Object storeId = mapItem.get("storeId");
                             if ("online".equals(storeId)) {
-                                Map<String, String> cleanedOnline = new HashMap<>();
+                                Map<String, Object> cleanedOnline = new HashMap<>();
                                 cleanedOnline.put("storeId", "online");
+                                cleanedOnline.put("stock", 0);
                                 cleanedList.add(cleanedOnline);
                             } else {
                                 cleanedList.add(item);
@@ -164,8 +166,9 @@ public class DataOracleServiceImpl implements DataOracleService {
                     inventoryRepository.save(inventoryDoc);
                     log.info("Cleaned extra fields from online storeId for SKU {} (Case 4 updated)", sku);
                 } else {
-                    Map<String, String> onlineStore = new HashMap<>();
+                    Map<String, Object> onlineStore = new HashMap<>();
                     onlineStore.put("storeId", "online");
+                    onlineStore.put("stock", 0);
                     inventoryList.add(onlineStore);
                     inventoryDoc.setInventory(inventoryList);
                     inventoryRepository.save(inventoryDoc);
