@@ -94,7 +94,7 @@ public class DataOracleServiceImpl implements DataOracleService {
 
             int deleted = oracleDBRepository.deleteIuoBySkusInBatch(chunk, productType);
             totalDeleted += deleted;
-            log.info("Filas eliminadas del bloque: {}", deleted);
+            log.info("SKUs eliminados del bloque: {}", deleted);
 
             try {
                 Thread.sleep(120000);
@@ -177,5 +177,4 @@ public class DataOracleServiceImpl implements DataOracleService {
             }
         }
     }
-
 }

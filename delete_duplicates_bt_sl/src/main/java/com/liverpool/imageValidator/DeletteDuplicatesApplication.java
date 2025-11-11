@@ -78,7 +78,7 @@ public class DeletteDuplicatesApplication implements CommandLineRunner {
 
                 if (skusArgs.isEmpty()) {
                     log.error("Los argumentos no contienen SKUs válidos. Ejemplo correcto:");
-                    log.error("  java -jar app.jar 1000161795,1000792191,1001447773");
+                    log.error("  java -jar app.jar sku1,sku2,sku3");
                     return;
                 }
 
