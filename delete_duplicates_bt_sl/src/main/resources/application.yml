@@ -53,12 +53,12 @@ spring:
 
 datasource:
   primary:
-    jdbc-url: jdbc:oracle:thin:@172.27.203.166:1527/IUOP
+    jdbc-url: ****
     username: ****
     password: ****
     driver-class-name: oracle.jdbc.OracleDriver
   secondary:
-    jdbc-url: jdbc:oracle:thin:@172.17.212.8:1521/ATGPRO
+    jdbc-url: ****
     username: ****
     password: ****
     driver-class-name: oracle.jdbc.OracleDriver
